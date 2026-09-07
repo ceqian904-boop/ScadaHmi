@@ -1,0 +1,16 @@
+# ===== Visual Studio 缓存（不要上传）=====
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ===== 编译输出（自动生成，不要上传）=====
+bin/
+obj/
+
+# ===== 其他 IDE / 系统文件 =====
+.idea/
+*.swp
+Thumbs.db
+Desktop.ini
