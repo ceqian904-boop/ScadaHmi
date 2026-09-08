@@ -14,3 +14,6 @@ obj/
 *.swp
 Thumbs.db
 Desktop.ini
+
+# ===== 临时测试项目（不要上传）=====
+Demo/
