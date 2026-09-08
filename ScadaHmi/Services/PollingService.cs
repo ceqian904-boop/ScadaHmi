@@ -6,6 +6,11 @@ namespace ScadaHmi.Services
 {
     public class PollingService
     {
+        //定义一个委托(相当于广播站，定义播放什么内容)
+        public delegate void DataReceivedHandler(Dictionary<string, double> data);
+        //定义一个事件(相当于广播铃，广播站播放内容时，铃响)
+        public event DataReceivedHandler DataReceived;
+
         private readonly ICommDriver _driver;
 
         public PollingService(ICommDriver driver)
@@ -21,6 +26,8 @@ namespace ScadaHmi.Services
             }
 
             Dictionary<string, double> data = _driver.Read();
+
+            DataReceived?.Invoke(data); //触发事件，通知订阅者数据已到达
 
             foreach (var kvp in data)
             {
