@@ -1,43 +1,61 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 using System.Windows;
 using ScadaHmi.Comm;
 using ScadaHmi.Services;
-using ScadaHmi.Learning;   // 引用刚才的 demo（第 4 步用）
 
 namespace ScadaHmi
 {
     public partial class MainWindow : Window
     {
+        // 刹车：谁持有 _cts，谁就能喊停。
+        private readonly CancellationTokenSource _cts = new();
+
+        // 传送带：容量 100。
+        private readonly Channel<Dictionary<string, double>> _channel =
+            Channel.CreateBounded<Dictionary<string, double>>(100);
+
         public MainWindow()
         {
             InitializeComponent();
+            StartPipeline();
+        }
 
-            // ★ 先运行一下学习 demo，看看事件推送效果
-            EventDemo.Run();
+        private void StartPipeline()
+        {
+            var driver = new MockDriver();
 
-            var svc = new PollingService(new MockDriver());
+            var producer = new AcquisitionService(driver, _channel.Writer);
+            var consumer = new DataProcessor(_channel.Reader, OnData);
 
-            // ── 订阅者 1：控制台（数据每到一个，打印一条）──
-            svc.DataReceived += d =>
+            // 两个都丢后台线程，别堵 UI。
+            _ = Task.Run(() => producer.RunAsync(_cts.Token));
+            _ = Task.Run(() => consumer.RunAsync(_cts.Token));
+        }
+
+        // ★ 这是在后台线程上执行的！
+        private void OnData(Dictionary<string, double> data)
+        {
+            if (!data.ContainsKey("温度")) return;
+
+            System.Diagnostics.Debug.WriteLine($"[处理] 温度 = {data["温度"]:F1}");
+
+            // ★ 后台线程不能直接碰 UI 控件，Dispatcher.Invoke 送它回 UI 线程。
+            Dispatcher.Invoke(() =>
             {
-                foreach (var kvp in d)
-                    System.Diagnostics.Debug.WriteLine($"[控制台] {kvp.Key} = {kvp.Value:F1}");
+                Title = $"实时温度: {data["温度"]:F1} ℃";
+            });
+        }
 
-            };
-
-            // ── 订阅者 2：界面（把窗口标题改成最新温度，你能亲眼看到在动）──
-            svc.DataReceived += d =>
-            {
-                if (d.ContainsKey("温度"))
-                    this.Title = $"实时温度: {d["温度"]:F1} ℃";
-            };
-
-            var timer = new System.Windows.Threading.DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(1)
-            };
-            timer.Tick += (s, e) => svc.PollOnce();
-            timer.Start();
+        // 关窗口踩刹车，两个后台循环优雅退出。
+        protected override void OnClosed(EventArgs e)
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+            base.OnClosed(e);
         }
     }
 }

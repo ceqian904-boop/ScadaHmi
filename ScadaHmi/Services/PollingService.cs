@@ -28,11 +28,6 @@ namespace ScadaHmi.Services
             Dictionary<string, double> data = _driver.Read();
 
             DataReceived?.Invoke(data); //触发事件，通知订阅者数据已到达
-
-            foreach (var kvp in data)
-            {
-                Console.WriteLine($"{kvp.Key}: {kvp.Value}");
-            }
         }
 
 
