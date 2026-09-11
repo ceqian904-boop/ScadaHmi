@@ -7,6 +7,52 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
+        <!-- 三个大字数值 -->
+        <UniformGrid Columns="3">
+            <StackPanel>
+                <TextBlock Text="温度" FontSize="20" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Temperature, StringFormat={}{0:F1} ℃}"
+                           FontSize="48" HorizontalAlignment="Center"/>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="压力" FontSize="20" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Pressure, StringFormat={}{0:F2} MPa}"
+                           FontSize="48" HorizontalAlignment="Center"/>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="流量" FontSize="20" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Flow, StringFormat={}{0:F0} m³/h}"
+                           FontSize="48" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </UniformGrid>
+
+        <!-- 连接状态：绑 Isconnected（注意是 Isconnected，不是 IsConnected）。
+             这里不用写转换器，靠 DataTrigger 直接切换文字和颜色。 -->
+        <TextBlock Grid.Row="1" FontSize="16" Margin="0,0,0,8" HorizontalAlignment="Center">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Text" Value="● 未连接"/>
+                    <Setter Property="Foreground" Value="Gray"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Isconnected}" Value="True">
+                            <Setter Property="Text" Value="● 已连接（采集中）"/>
+                            <Setter Property="Foreground" Value="Green"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <!-- 启动/停止：VM 里配了 CanExecute，所以运行中"启动"会自动变灰 -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
+            <Button Content="启动" Command="{Binding StartCommand}" Margin="10" Padding="20,5"/>
+            <Button Content="停止" Command="{Binding StopCommand}" Margin="10" Padding="20,5"/>
+        </StackPanel>
     </Grid>
 </Window>

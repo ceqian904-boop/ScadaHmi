@@ -10,7 +10,7 @@ namespace ScadaHmi.Services
     /// <summary>
     /// 【生产者】后台异步循环读设备，把每次读到的数据丢进管道。
     /// </summary>
-    public class AcquisitionService
+    public class AcquisitionService   //数据采集服务
     {
         private readonly ICommDriver _driver;
         private readonly ChannelWriter<Dictionary<string, double>> _writer;
@@ -22,14 +22,14 @@ namespace ScadaHmi.Services
             _writer = writer;
         }
 
-        public async Task RunAsync(CancellationToken ct)
+        public async Task RunAsync(CancellationToken ct)   //异步      CancellationToken意思是停止标志，它不会强制终止线程，而是通过一个“信号”礼貌地通知异步操作
         {
             if (!_driver.Isconnected)
                 _driver.Connect();
 
             try
             {
-                while (!ct.IsCancellationRequested)
+                while (!ct.IsCancellationRequested)       //IsCancellationRequested类似于一个红绿灯，
                 {
                     var data = _driver.Read();
 
@@ -46,7 +46,7 @@ namespace ScadaHmi.Services
             }
             finally
             {
-                // ★ 关键：关掉传送带。消费者靠这个信号才知道"不会再有数据了"。
+                // 关键：关掉传送带。消费者靠这个信号才知道"不会再有数据了"。
                 _writer.Complete();
                 _driver.Disconnect();
             }

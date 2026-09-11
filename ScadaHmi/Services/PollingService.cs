@@ -11,6 +11,8 @@ namespace ScadaHmi.Services
         //定义一个事件(相当于广播铃，广播站播放内容时，铃响)
         public event DataReceivedHandler DataReceived;
 
+        //public event Action<Dictionary<string, double>> DataReceived;      上面两句合并
+
         private readonly ICommDriver _driver;
 
         public PollingService(ICommDriver driver)
