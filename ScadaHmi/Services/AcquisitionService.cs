@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using ScadaHmi.Comm;
+using ScadaHmi.Communication;
 
 namespace ScadaHmi.Services
 {
@@ -25,13 +25,13 @@ namespace ScadaHmi.Services
         public async Task RunAsync(CancellationToken ct)   //异步      CancellationToken意思是停止标志，它不会强制终止线程，而是通过一个“信号”礼貌地通知异步操作
         {
             if (!_driver.Isconnected)
-                _driver.Connect();
+                await _driver.ConnectAsync(ct);
 
             try
             {
                 while (!ct.IsCancellationRequested)       //IsCancellationRequested类似于一个红绿灯，
                 {
-                    var data = _driver.Read();
+                    var data = await _driver.ReadAsync(ct);
 
                     // 写进管道。管道满时这里会"让路"等空位（背压），不是死等。
                     await _writer.WriteAsync(data, ct);
@@ -48,7 +48,7 @@ namespace ScadaHmi.Services
             {
                 // 关键：关掉传送带。消费者靠这个信号才知道"不会再有数据了"。
                 _writer.Complete();
-                _driver.Disconnect();
+                await _driver.DisconnectAsync();
             }
         }
     }

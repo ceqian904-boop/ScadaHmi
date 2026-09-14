@@ -6,7 +6,8 @@ namespace ScadaHmi.Learning
     public class Broadcaster
     {
         // Action<string> 是一个现成委托：接收 string 参数，无返回值
-        public event Action<string> OnMessage;   // 事件：广播铃
+        // 可空 ?：没人订阅时事件就是 null，这是正常状态，不是错误
+        public event Action<string>? OnMessage;   // 事件：广播铃
 
         public void Broadcast(string msg)
         {
