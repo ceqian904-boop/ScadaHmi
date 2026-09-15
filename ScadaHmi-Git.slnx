@@ -1,3 +1,6 @@
 <Solution>
+  <Project Path="ScadaHmi.Communication/ScadaHmi.Communication.csproj" />
+  <Project Path="ScadaHmi.Data/ScadaHmi.Data.csproj" />
+  <Project Path="ScadaHmi.Services/ScadaHmi.Services.csproj" />
   <Project Path="ScadaHmi/ScadaHmi.csproj" />
 </Solution>

@@ -13,11 +13,11 @@ namespace ScadaHmi.Communication
         private readonly string _ip;
         private readonly int _port;
         private readonly byte _slaveId;
-        private readonly List<ModbusPoint> _points;
+        private readonly List<ModbusPoint> _points; //点位表
 
         // 两个都可空：没 Connect 的时候是 null
-        private TcpClient? _tcp;
-        private IModbusMaster? _master;
+        private TcpClient? _tcp;                 //TcpClient 就是负责“拨号、接通并说话”的 客户端程序
+        private IModbusMaster? _master;         //通信的核心接口
 
         /// <summary>最近一次的错误信息，供上层做日志</summary>
         public string? LastError { get; private set; }

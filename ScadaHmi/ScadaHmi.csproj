@@ -10,7 +10,11 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="NModbus" Version="3.0.83" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ScadaHmi.Communication\ScadaHmi.Communication.csproj" />
+    <ProjectReference Include="..\ScadaHmi.Services\ScadaHmi.Services.csproj" />
   </ItemGroup>
 
 </Project>
