@@ -13,12 +13,12 @@ namespace ScadaHmi.Services
         // 创建一个实例 = 一套全新的管道；Stop 之后可以再 Start（内部会重建）
         private readonly ICommDriver _driver;//数据从哪来
         private readonly Action<Dictionary<string, double>> _onData;//数据往哪去
-        private readonly int _channelCapacity;//中间能攒多少
+        private readonly int _channelCapacity;//中间能攒多少,通道容量
         private CancellationTokenSource? _cts; //_cts = 新建取消开关
         private Channel<Dictionary<string, double>>? _channel; //_channel = 新建传送带
         private Task? _producerTask;  //启动采集循环（把数据放上传送带）
         private Task? _consumerTask;   //启动处理循环（从传送带取数据）
-        private bool _disposed;
+        private bool _disposed;       //用于显式释放非托管资源和有限的托管资源
 
         public bool IsRunning { get; private set; }
         public AcquisitionHost(ICommDriver driver,Action<Dictionary<string,double>>
@@ -104,6 +104,16 @@ namespace ScadaHmi.Services
 
 
         }
-        public void Dispose() => throw new NotImplementedException(); // 销毁
+        public void Dispose()  // 销毁
+        {
+            //同一个请求无论执行一次还是多次，
+            //最终的业务结果和系统状态完全一致，不会产生额外的副作用
+            if (_disposed) return;
+
+            _disposed = true;
+            //同步阻塞等待异步方法执行完毕，且异常堆栈更干净。
+            //本质就是 "我不想/不能写 await，但我必须等它执行完
+            StopAsync().GetAwaiter().GetResult(); 
+        }
     }
 }
